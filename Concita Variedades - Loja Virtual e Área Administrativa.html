@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concita Variedades | Loja Virtual & Painel Administrativo</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Playfair Display + Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Configuração de Cores e Estilos Globais -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            rose: '#E8A5B8',
+                            roseDark: '#C86D85',
+                            wine: '#581825',
+                            wineLight: '#802638',
+                            gold: '#D4AF37',
+                            goldHover: '#AA8828',
+                            cream: '#FFFDF9',
+                            softBg: '#FAFAF8'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-wine {
+            background: linear-gradient(135deg, #581825 0%, #802638 100%);
+        }
+        .gradient-gold {
+            background: linear-gradient(135deg, #D4AF37 0%, #F3E5AB 50%, #AA8828 100%);
+        }
+        .glass-header {
+            background: rgba(255, 253, 249, 0.92);
+            backdrop-filter: blur(10px);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FAFAF8;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E8A5B8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #C86D85;
+        }
+    </style>
+</head>
+<body class="bg-brand-softBg text-gray-800 font-sans min-h-screen flex flex-col antialiased">
+
+    <!-- Configuração do Número do WhatsApp -->
+    <script>
+        const whatsappNumero = "5598992268585"; // WhatsApp de Concita Variedades
+    </script>
+
+    <!-- TOAST DE NOTIFICAÇÃO -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-brand-wine text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-brand-gold/30">
+        <i id="toastIcon" class="fas fa-check-circle text-brand-gold text-xl"></i>
+        <span id="toastMsg" class="font-medium text-sm">Notificação</span>
+    </div>
+
+    <!-- CABEÇALHO / HEADER -->
+    <header class="sticky top-0 z-40 glass-header border-b border-brand-rose/20 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+            <!-- Logo / Identidade Visual -->
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full gradient-wine flex items-center justify-center text-brand-gold shadow-md border-2 border-brand-gold/40">
+                    <i class="fas fa-gem text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-serif font-bold text-2xl text-brand-wine leading-tight">Concita</h1>
+                    <p class="text-xs tracking-widest text-brand-roseDark font-medium uppercase">Variedades</p>
+                </div>
+            </div>
+
+            <!-- Ações Direitas (Pesquisa Mobile, Carrinho & Admin Status) -->
+            <div class="flex items-center gap-3">
+                <!-- Status do Admin Logado -->
+                <div id="adminBadge" class="hidden sm:flex items-center gap-2 bg-brand-wine/10 text-brand-wine text-xs px-3 py-1.5 rounded-full border border-brand-wine/20 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span>Modo Admin</span>
+                    <button onclick="logoutAdmin()" class="ml-1 text-red-600 hover:text-red-800 underline font-bold" title="Sair da Administração">Sair</button>
+                </div>
+
+                <!-- Botão Carrinho -->
+                <button onclick="toggleCartModal()" class="relative p-2.5 rounded-full bg-brand-rose/20 hover:bg-brand-rose/30 text-brand-wine transition-all">
+                    <i class="fas fa-shopping-bag text-lg"></i>
+                    <span id="cartCount" class="absolute -top-1 -right-1 bg-brand-wine text-brand-gold font-bold text-xs w-5 h-5 rounded-full flex items-center justify-center shadow">0</span>
+                </button>
+
+                <!-- Botão Entrar Admin (Se não estiver logado) -->
+                <button id="loginBtnNav" onclick="openLoginModal()" class="flex items-center gap-2 bg-brand-wine text-white text-xs sm:text-sm px-3.5 py-2 rounded-xl hover:bg-brand-wineLight transition-all shadow-sm">
+                    <i class="fas fa-lock"></i>
+                    <span class="hidden md:inline">Área Restrita</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- BANNER HERO -->
+    <section class="gradient-wine text-white py-10 px-4 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#D4AF37_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <div class="max-w-4xl mx-auto text-center relative z-10 space-y-3">
+            <span class="inline-block px-3 py-1 bg-brand-gold/20 text-brand-gold rounded-full text-xs font-semibold tracking-wider uppercase border border-brand-gold/30">
+                Lojas & Novidades
+            </span>
+            <h2 class="font-serif text-3xl sm:text-5xl font-bold text-brand-cream">Elegância e Variedade para Você</h2>
+            <p class="text-brand-rose text-sm sm:text-base max-w-2xl mx-auto font-light">
+                Explore nossa coleção exclusiva de roupas, perfumes importados, acessórios modernos e itens especiais. Compre diretamente pelo WhatsApp!
+            </p>
+        </div>
+    </section>
+
+    <!-- CONTEÚDO PRINCIPAL (VITRINE OU PAINEL ADMIN) -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- PAINEL ADMINISTRATIVO (Visível apenas após Login) -->
+        <div id="adminPanel" class="hidden mb-10 bg-white rounded-2xl shadow-xl border border-brand-rose/30 overflow-hidden">
+            <!-- Header do Painel -->
+            <div class="gradient-wine px-6 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-brand-gold/30">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-brand-gold/20 text-brand-gold rounded-lg">
+                        <i class="fas fa-user-shield text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-lg">Painel de Gerenciamento da Loja</h3>
+                        <p class="text-brand-rose text-xs">Bem-vinda, Concita! Adicione, edite ou remova produtos.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button onclick="openProductModal()" class="bg-brand-gold hover:bg-brand-goldHover text-brand-wine font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2 shadow-md transition-all">
+                        <i class="fas fa-plus"></i>
+                        <span>Novo Produto</span>
+                    </button>
+                    <button onclick="restoreDefaultProducts()" class="bg-white/10 hover:bg-white/20 text-white border border-white/30 text-xs px-3 py-2 rounded-xl transition-all" title="Restaurar lista original">
+                        <i class="fas fa-rotate-left mr-1"></i> Restaurar Padrões
+                    </button>
+                    <button onclick="logoutAdmin()" class="bg-red-500/80 hover:bg-red-600 text-white text-xs px-3 py-2 rounded-xl transition-all sm:hidden">
+                        Sair
+                    </button>
+                </div>
+            </div>
+
+            <!-- AVISO DE SEGURANÇA SOBRE CLIENT-SIDE -->
+            <div class="p-4 bg-amber-50 border-b border-amber-200 text-amber-900 text-xs sm:text-sm flex items-start gap-3">
+                <i class="fas fa-shield-halved text-amber-600 text-lg flex-shrink-0 mt-0.5"></i>
+                <div class="space-y-1">
+                    <p class="font-bold">Aviso de Arquitetura & Segurança:</p>
+                    <p>Como este projeto roda exclusivamente em um único arquivo HTML (Frontend puro no navegador), as validações do código fonte JavaScript são visíveis no inspecionar do navegador. Para proteção real de nível produção em empresas, é fundamental integrar um servidor **Backend** (Node.js, Python, PHP, etc.) com banco de dados autenticado e criptografia JWT para proteger rotas e alterações de estoque.</p>
+                </div>
+            </div>
+
+            <!-- Tabela / Lista de Produtos do Admin -->
+            <div class="p-6">
+                <h4 class="font-bold text-brand-wine mb-4 text-sm uppercase tracking-wider">Produtos Cadastrados (<span id="adminProductCount">0</span>)</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-600 border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-200 bg-gray-50 text-xs uppercase font-semibold text-gray-500">
+                                <th class="py-3 px-4">Imagem</th>
+                                <th class="py-3 px-4">Nome</th>
+                                <th class="py-3 px-4">Categoria</th>
+                                <th class="py-3 px-4">Preço</th>
+                                <th class="py-3 px-4 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminProductTableBody" class="divide-y divide-gray-100">
+                            <!-- Inserido dinamicamente via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- BARRA DE PESQUISA E FILTROS DE CATEGORIA -->
+        <div class="space-y-6 mb-8">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <!-- Input de Busca em Tempo Real -->
+                <div class="relative w-full md:w-96">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="searchInput" oninput="filterProducts()" placeholder="Pesquisar roupa, perfume, acessório..." class="w-full pl-11 pr-4 py-3 rounded-2xl border border-brand-rose/30 focus:border-brand-wine focus:ring-2 focus:ring-brand-wine/20 bg-white shadow-sm outline-none transition-all text-sm">
+                </div>
+
+                <!-- Contagem de Produtos da Vitrine -->
+                <div class="text-xs text-gray-500 font-medium">
+                    Exibindo <span id="showingCount" class="font-bold text-brand-wine">0</span> produtos
+                </div>
+            </div>
+
+            <!-- Botoes de Categoria -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none" id="categoryContainer">
+                <button onclick="setCategory('Todos')" class="category-btn active px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-brand-wine text-white shadow-sm" data-category="Todos">
+                    Todos
+                </button>
+                <button onclick="setCategory('Roupas')" class="category-btn px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white border border-brand-rose/30 text-gray-700 hover:border-brand-wine" data-category="Roupas">
+                    👗 Roupas
+                </button>
+                <button onclick="setCategory('Perfumes')" class="category-btn px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white border border-brand-rose/30 text-gray-700 hover:border-brand-wine" data-category="Perfumes">
+                    ✨ Perfumes
+                </button>
+                <button onclick="setCategory('Acessórios')" class="category-btn px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white border border-brand-rose/30 text-gray-700 hover:border-brand-wine" data-category="Acessórios">
+                    👜 Acessórios
+                </button>
+                <button onclick="setCategory('Variedades')" class="category-btn px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all bg-white border border-brand-rose/30 text-gray-700 hover:border-brand-wine" data-category="Variedades">
+                    🎁 Variedades
+                </button>
+            </div>
+        </div>
+
+        <!-- GRID DE PRODUTOS DA VITRINE -->
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Renderizado via JavaScript -->
+        </div>
+
+        <!-- MENSAGEM DE NENHUM PRODUTO ENCONTRADO -->
+        <div id="emptyState" class="hidden text-center py-16 space-y-4">
+            <div class="w-20 h-20 mx-auto rounded-full bg-brand-rose/10 flex items-center justify-center text-brand-wine text-3xl">
+                <i class="fas fa-box-open"></i>
+            </div>
+            <h3 class="font-serif text-xl font-bold text-brand-wine">Nenhum produto encontrado</h3>
+            <p class="text-gray-500 text-sm max-w-sm mx-auto">Tente buscar por outros termos ou selecionar outra categoria acima.</p>
+            <button onclick="resetFilters()" class="text-xs font-bold text-brand-roseDark underline hover:text-brand-wine">Limpar busca e filtros</button>
+        </div>
+
+    </main>
+
+    <!-- RODAPÉ -->
+    <footer class="bg-brand-wine text-white mt-16 border-t border-brand-gold/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="font-serif text-xl font-bold text-brand-gold mb-3">Concita Variedades</h3>
+                    <p class="text-brand-rose/80 text-sm leading-relaxed">
+                        Sua loja de confiança para moda, perfumes e acessórios com o melhor atendimento e entrega rápida.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm text-brand-gold uppercase tracking-wider mb-3">Atendimento</h4>
+                    <p class="text-sm text-brand-rose/80">WhatsApp: <a href="https://wa.me/5598992268585" target="_blank" class="underline font-medium hover:text-white">+55 (98) 99226-8585</a></p>
+                    <p class="text-sm text-brand-rose/80 mt-1">Horário: Seg a Sáb - 08h às 18h</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm text-brand-gold uppercase tracking-wider mb-3">Área do Administrador</h4>
+                    <p class="text-xs text-brand-rose/70 mb-3">Apenas a proprietária possui acesso à gestão do catálogo.</p>
+                    <button onclick="openLoginModal()" class="text-xs bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg border border-white/20 transition-all flex items-center gap-2">
+                        <i class="fas fa-lock"></i> Entrar na Administração
+                    </button>
+                </div>
+            </div>
+            <div class="border-t border-white/10 mt-8 pt-6 text-center text-xs text-brand-rose/60">
+                &copy; Concita Variedades. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL DE LOGIN ADMINISTRATIVO -->
+    <div id="loginModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-brand-rose/30 transform scale-95 transition-all duration-300" id="loginModalBox">
+            
+            <!-- Modal Header -->
+            <div class="gradient-wine p-6 text-center relative">
+                <button onclick="closeLoginModal()" class="absolute right-4 top-4 text-white/70 hover:text-white p-1 text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="w-16 h-16 rounded-full bg-white/10 border-2 border-brand-gold/50 flex items-center justify-center mx-auto mb-3 text-brand-gold text-2xl shadow-inner">
+                    <i class="fas fa-user-lock"></i>
+                </div>
+                <h3 class="font-serif text-2xl font-bold text-white">Acesso Administrativo</h3>
+                <p class="text-brand-rose text-xs mt-1">Concita Variedades — Restrito à Proprietária</p>
+            </div>
+
+            <!-- Form -->
+            <form onsubmit="handleLogin(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-brand-wine uppercase tracking-wider mb-1">Usuário</label>
+                    <div class="relative">
+                        <i class="fas fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" id="loginUser" required placeholder="Digite o usuário" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 focus:border-brand-wine focus:ring-2 focus:ring-brand-wine/20 text-sm outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-brand-wine uppercase tracking-wider mb-1">Senha</label>
+                    <div class="relative">
+                        <i class="fas fa-key absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="password" id="loginPass" required placeholder="Digite a senha" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 focus:border-brand-wine focus:ring-2 focus:ring-brand-wine/20 text-sm outline-none">
+                    </div>
+                </div>
+
+                <!-- Mensagem de Erro -->
+                <div id="loginError" class="hidden p-3 bg-red-50 text-red-700 text-xs rounded-xl flex items-center gap-2 border border-red-200">
+                    <i class="fas fa-exclamation-circle text-red-500 text-base"></i>
+                    <span>Usuário ou senha incorretos!</span>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-brand-wine hover:bg-brand-wineLight text-white font-bold rounded-xl text-sm shadow-md transition-all flex items-center justify-center gap-2">
+                    <i class="fas fa-sign-in-alt"></i> Entrar no Painel
+                </button>
+
+                <!-- Dica informativa sobre conta única -->
+                <p class="text-[11px] text-gray-500 text-center leading-tight pt-2 border-t border-gray-100">
+                    <i class="fas fa-info-circle text-brand-roseDark"></i> Apenas uma conta administrativa cadastrada. Não há opção de auto-cadastro público.
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE CADASTRO / EDIÇÃO DE PRODUTO -->
+    <div id="productModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-brand-rose/30 transform scale-95 transition-all duration-300" id="productModalBox">
+            
+            <div class="gradient-wine px-6 py-4 flex items-center justify-between text-white">
+                <h3 id="productModalTitle" class="font-bold text-lg">Adicionar Novo Produto</h3>
+                <button onclick="closeProductModal()" class="text-white/70 hover:text-white text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form onsubmit="saveProduct(event)" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                <input type="hidden" id="prodId">
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nome do Produto</label>
+                    <input type="text" id="prodName" required placeholder="Ex: Vestido Floral Elegante" class="w-full px-3.5 py-2 rounded-xl border border-gray-300 text-sm focus:border-brand-wine focus:ring-1 focus:ring-brand-wine outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Preço (R$)</label>
+                        <input type="number" step="0.01" id="prodPrice" required placeholder="89.90" class="w-full px-3.5 py-2 rounded-xl border border-gray-300 text-sm focus:border-brand-wine focus:ring-1 focus:ring-brand-wine outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Categoria</label>
+                        <select id="prodCategory" required class="w-full px-3.5 py-2 rounded-xl border border-gray-300 text-sm focus:border-brand-wine focus:ring-1 focus:ring-brand-wine outline-none bg-white">
+                            <option value="Roupas">Roupas</option>
+                            <option value="Perfumes">Perfumes</option>
+                            <option value="Acessórios">Acessórios</option>
+                            <option value="Variedades">Variedades</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">URL da Imagem / Foto</label>
+                    <input type="url" id="prodImage" required placeholder="https://exemplo.com/foto.jpg" class="w-full px-3.5 py-2 rounded-xl border border-gray-300 text-sm focus:border-brand-wine focus:ring-1 focus:ring-brand-wine outline-none">
+                    <p class="text-[10px] text-gray-400 mt-1">Cole o link direto da imagem (Unsplash, Imgur, Pinterest, etc.)</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Descrição</label>
+                    <textarea id="prodDesc" rows="3" placeholder="Detalhes do tamanho, fragrância ou material..." class="w-full px-3.5 py-2 rounded-xl border border-gray-300 text-sm focus:border-brand-wine focus:ring-1 focus:ring-brand-wine outline-none"></textarea>
+                </div>
+
+                <div class="pt-2 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeProductModal()" class="px-4 py-2 border border-gray-300 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">Cancelar</button>
+                    <button type="submit" class="px-5 py-2 bg-brand-wine hover:bg-brand-wineLight text-white rounded-xl text-sm font-bold shadow-md transition-all">Salvar Produto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DO CARRINHO DE COMPRAS -->
+    <div id="cartModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-brand-rose/30 transform scale-95 transition-all duration-300 flex flex-col max-h-[85vh]" id="cartModalBox">
+            
+            <div class="gradient-wine px-6 py-4 flex items-center justify-between text-white">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-shopping-bag text-brand-gold"></i>
+                    <h3 class="font-bold text-lg">Meu Carrinho de Compras</h3>
+                </div>
+                <button onclick="toggleCartModal()" class="text-white/70 hover:text-white text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div id="cartItemsContainer" class="p-6 overflow-y-auto flex-grow divide-y divide-gray-100">
+                <!-- Itens inseridos via JS -->
+            </div>
+
+            <div class="p-6 bg-gray-50 border-t border-gray-200 space-y-4">
+                <div class="flex justify-between items-center text-base font-bold text-brand-wine">
+                    <span>Total do Pedido:</span>
+                    <span id="cartTotalDisplay">R$ 0,00</span>
+                </div>
+                <button onclick="sendCartToWhatsApp()" id="checkoutCartBtn" class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-sm shadow-lg transition-all flex items-center justify-center gap-2">
+                    <i class="fab fa-whatsapp text-lg"></i> Enviar Pedido Completo no WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT PRINCIPAL DA APLICAÇÃO -->
+    <script>
+        // PRODUTOS PADRÃO (Iniciais caso o localStorage esteja limpo)
+        const initialProducts = [
+            {
+                id: "1",
+                name: "Vestido Midi Floral Primavera",
+                price: 129.90,
+                category: "Roupas",
+                image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=600&q=80",
+                description: "Vestido midi leve, estampa floral exclusiva, perfeito para eventos casuais e passeios."
+            },
+            {
+                id: "2",
+                name: "Perfume Importado Eau de Parfum 100ml",
+                price: 249.90,
+                category: "Perfumes",
+                image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=600&q=80",
+                description: "Fragrância marcante com notas florais e amadeiradas. Longa fixação."
+            },
+            {
+                id: "3",
+                name: "Bolsa de Couro Sintético Premium",
+                price: 159.00,
+                category: "Acessórios",
+                image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80",
+                description: "Bolsa feminina elegante com alça transversal ajustável e detalhes dourados."
+            },
+            {
+                id: "4",
+                name: "Conjunto Blusa e Saia Elegante",
+                price: 189.90,
+                category: "Roupas",
+                image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80",
+                description: "Conjunto moderno em tecido encorpado de excelente caimento."
+            },
+            {
+                id: "5",
+                name: "Kit de Maquiagem & Pincéis",
+                price: 79.90,
+                category: "Variedades",
+                image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80",
+                description: "Estojo completo com pincéis macios e paleta de sombras versátil."
+            },
+            {
+                id: "6",
+                name: "Óculos de Sol Estilo Cat Eye",
+                price: 69.90,
+                category: "Acessórios",
+                image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=600&q=80",
+                description: "Proteção UV400, design retrô chique com armação leve."
+            }
+        ];
+
+        // ESTADO GLOBAL DA APLICAÇÃO
+        let products = [];
+        let cart = [];
+        let currentCategory = "Todos";
+        let isAdminLoggedIn = false;
+
+        // INICIALIZAÇÃO AO CARREGAR A PÁGINA
+        window.addEventListener('DOMContentLoaded', () => {
+            loadProducts();
+            checkAdminSession();
+            renderProducts();
+            updateCartBadge();
+        });
+
+        // CARREGAR PRODUTOS (LOCALSTORAGE OU PADRÃO)
+        function loadProducts() {
+            const saved = localStorage.getItem('concita_products');
+            if (saved) {
+                try {
+                    products = JSON.parse(saved);
+                } catch (e) {
+                    products = [...initialProducts];
+                }
+            } else {
+                products = [...initialProducts];
+                saveProductsToStorage();
+            }
+        }
+
+        // SALVAR NO LOCALSTORAGE
+        function saveProductsToStorage() {
+            localStorage.setItem('concita_products', JSON.stringify(products));
+        }
+
+        // RESTAURAR PRODUTOS PADRÃO
+        function restoreDefaultProducts() {
+            if (confirm("Deseja restaurar os produtos padrão da loja? Alterações manuais serão resetadas.")) {
+                products = [...initialProducts];
+                saveProductsToStorage();
+                renderProducts();
+                renderAdminTable();
+                showToast("Produtos padrão restaurados com sucesso!");
+            }
+        }
+
+        // CONTROLE DA SESSÃO ADMIN
+        function checkAdminSession() {
+            const logged = sessionStorage.getItem('concita_admin_logged');
+            if (logged === 'true') {
+                isAdminLoggedIn = true;
+                document.getElementById('adminPanel').classList.remove('hidden');
+                document.getElementById('adminBadge').classList.remove('hidden');
+                document.getElementById('adminBadge').classList.add('flex');
+                document.getElementById('loginBtnNav').classList.add('hidden');
+                renderAdminTable();
+            } else {
+                isAdminLoggedIn = false;
+                document.getElementById('adminPanel').classList.add('hidden');
+                document.getElementById('adminBadge').classList.addClass = 'hidden';
+                document.getElementById('adminBadge').classList.remove('flex');
+                document.getElementById('loginBtnNav').classList.remove('hidden');
+            }
+        }
+
+        // LOGIN ADMINISTRATIVO
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            const errorEl = document.getElementById('loginError');
+
+            // Credenciais solicitadas
+            if (user === "concita" && pass === "136879") {
+                sessionStorage.setItem('concita_admin_logged', 'true');
+                errorEl.classList.add('hidden');
+                closeLoginModal();
+                checkAdminSession();
+                showToast("Bem-vinda, Concita! Login efetuado.");
+                // Limpar campos
+                document.getElementById('loginUser').value = "";
+                document.getElementById('loginPass').value = "";
+            } else {
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        function logoutAdmin() {
+            sessionStorage.removeItem('concita_admin_logged');
+            checkAdminSession();
+            showToast("Você saiu da área administrativa.");
+        }
+
+        // ABERTURA / FECHAMENTO DE MODAIS
+        function openLoginModal() {
+            const modal = document.getElementById('loginModal');
+            const box = document.getElementById('loginModalBox');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }
+
+        function closeLoginModal() {
+            const modal = document.getElementById('loginModal');
+            const box = document.getElementById('loginModalBox');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            box.classList.remove('scale-100');
+            box.classList.add('scale-95');
+            document.getElementById('loginError').classList.add('hidden');
+        }
+
+        // RENDERIZAÇÃO DA VITRINE DE PRODUTOS
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            const empty = document.getElementById('emptyState');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            const filtered = products.filter(p => {
+                const matchCategory = currentCategory === "Todos" || p.category === currentCategory;
+                const matchSearch = p.name.toLowerCase().includes(searchVal) || p.description.toLowerCase().includes(searchVal);
+                return matchCategory && matchSearch;
+            });
+
+            document.getElementById('showingCount').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            } else {
+                empty.classList.add('hidden');
+            }
+
+            grid.innerHTML = filtered.map(p => `
+                <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-brand-rose/20 overflow-hidden flex flex-col group">
+                    <!-- Foto do Produto -->
+                    <div class="relative h-64 overflow-hidden bg-gray-100">
+                        <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/600x600/E8A5B8/581825?text=Foto+Indisponivel'">
+                        <span class="absolute top-3 left-3 bg-brand-wine/90 text-brand-gold text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider backdrop-blur-md shadow-sm">
+                            ${p.category}
+                        </span>
+                    </div>
+
+                    <!-- Conteúdo -->
+                    <div class="p-5 flex flex-col flex-grow justify-between space-y-4">
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-base group-hover:text-brand-wine transition-colors line-clamp-1">${p.name}</h3>
+                            <p class="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">${p.description}</p>
+                        </div>
+
+                        <div>
+                            <div class="flex items-baseline gap-1 mb-3">
+                                <span class="text-xs text-brand-roseDark font-bold">R$</span>
+                                <span class="font-serif text-2xl font-bold text-brand-wine">${p.price.toFixed(2).replace('.', ',')}</span>
+                            </div>
+
+                            <!-- Botões de Ação -->
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="addToCart('${p.id}')" class="w-full py-2.5 px-3 bg-brand-rose/20 hover:bg-brand-rose/40 text-brand-wine font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1.5">
+                                    <i class="fas fa-cart-plus"></i> + Carrinho
+                                </button>
+                                <button onclick="buyNowWhatsApp('${p.id}')" class="w-full py-2.5 px-3 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5">
+                                    <i class="fab fa-whatsapp"></i> Comprar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // FILTROS & PESQUISA
+        function setCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                if (btn.dataset.category === cat) {
+                    btn.classList.add('bg-brand-wine', 'text-white', 'shadow-sm');
+                    btn.classList.remove('bg-white', 'text-gray-700', 'border');
+                } else {
+                    btn.classList.remove('bg-brand-wine', 'text-white', 'shadow-sm');
+                    btn.classList.add('bg-white', 'text-gray-700', 'border');
+                }
+            });
+            renderProducts();
+        }
+
+        function filterProducts() {
+            renderProducts();
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            setCategory('Todos');
+        }
+
+        // COMPRAR DIRETO NO WHATSAPP (UM PRODUTO)
+        function buyNowWhatsApp(productId) {
+            const prod = products.find(p => p.id === productId);
+            if (!prod) return;
+
+            const mensagem = `Olá, Concita! Gostaria de comprar o seguinte produto da loja:\n\n` +
+                             `📌 *Produto:* ${prod.name}\n` +
+                             `🏷️ *Categoria:* ${prod.category}\n` +
+                             `💰 *Preço:* R$ ${prod.price.toFixed(2).replace('.', ',')}\n\n` +
+                             `Como posso prosseguir com o pagamento e entrega?`;
+
+            const url = `https://wa.me/${whatsappNumero}?text=${encodeURIComponent(mensagem)}`;
+            window.open(url, '_blank');
+        }
+
+        // LÓGICA DO CARRINHO DE COMPRAS
+        function addToCart(productId) {
+            const prod = products.find(p => p.id === productId);
+            if (!prod) return;
+
+            const existing = cart.find(item => item.id === productId);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ ...prod, qty: 1 });
+            }
+
+            updateCartBadge();
+            showToast(`"${prod.name}" adicionado ao carrinho!`);
+        }
+
+        function updateCartBadge() {
+            const totalItems = cart.reduce((acc, item) => acc + item.qty, 0);
+            document.getElementById('cartCount').textContent = totalItems;
+        }
+
+        function toggleCartModal() {
+            const modal = document.getElementById('cartModal');
+            const box = document.getElementById('cartModalBox');
+
+            if (modal.classList.contains('opacity-0')) {
+                renderCartModal();
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                box.classList.remove('scale-95');
+                box.classList.add('scale-100');
+            } else {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                box.classList.remove('scale-100');
+                box.classList.add('scale-95');
+            }
+        }
+
+        function renderCartModal() {
+            const container = document.getElementById('cartItemsContainer');
+            const totalDisplay = document.getElementById('cartTotalDisplay');
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fas fa-shopping-bag text-4xl mb-2"></i>
+                        <p class="text-sm">Seu carrinho está vazio.</p>
+                    </div>
+                `;
+                totalDisplay.textContent = 'R$ 0,00';
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = cart.map(item => {
+                const subtotal = item.price * item.qty;
+                total += subtotal;
+                return `
+                    <div class="py-3 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <img src="${item.image}" alt="${item.name}" class="w-12 h-12 rounded-lg object-cover bg-gray-100">
+                            <div>
+                                <h4 class="font-bold text-xs text-gray-800 line-clamp-1">${item.name}</h4>
+                                <p class="text-xs text-brand-wine font-semibold">R$ ${item.price.toFixed(2).replace('.', ',')}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center border border-gray-200 rounded-lg">
+                                <button onclick="changeCartQty('${item.id}', -1)" class="px-2 py-1 text-xs text-gray-600 hover:bg-gray-100">-</button>
+                                <span class="px-2 text-xs font-bold">${item.qty}</span>
+                                <button onclick="changeCartQty('${item.id}', 1)" class="px-2 py-1 text-xs text-gray-600 hover:bg-gray-100">+</button>
+                            </div>
+                            <button onclick="removeFromCart('${item.id}')" class="text-red-500 hover:text-red-700 p-1 text-xs">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            totalDisplay.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
+
+        function changeCartQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (!item) return;
+            item.qty += delta;
+            if (item.qty <= 0) {
+                cart = cart.filter(i => i.id !== id);
+            }
+            updateCartBadge();
+            renderCartModal();
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(i => i.id !== id);
+            updateCartBadge();
+            renderCartModal();
+        }
+
+        function sendCartToWhatsApp() {
+            if (cart.length === 0) {
+                alert("Seu carrinho está vazio!");
+                return;
+            }
+
+            let texto = `Olá, Concita! Gostaria de fazer o seguinte pedido na loja:\n\n`;
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                const sub = item.price * item.qty;
+                total += sub;
+                texto += `${index + 1}. *${item.name}* (x${item.qty}) - R$ ${sub.toFixed(2).replace('.', ',')}\n`;
+            });
+
+            texto += `\n💵 *Total do Pedido:* R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
+            texto += `Como posso combinar a entrega e o pagamento?`;
+
+            const url = `https://wa.me/${whatsappNumero}?text=${encodeURIComponent(texto)}`;
+            window.open(url, '_blank');
+        }
+
+        // PAINEL CRUD DE PRODUTOS (ADMIN)
+        function renderAdminTable() {
+            const tbody = document.getElementById('adminProductTableBody');
+            document.getElementById('adminProductCount').textContent = products.length;
+
+            tbody.innerHTML = products.map(p => `
+                <tr class="hover:bg-gray-50/80 transition-colors">
+                    <td class="py-3 px-4">
+                        <img src="${p.image}" alt="${p.name}" class="w-10 h-10 rounded-lg object-cover border">
+                    </td>
+                    <td class="py-3 px-4 font-bold text-gray-800">${p.name}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 text-[10px] font-bold bg-brand-rose/20 text-brand-wine rounded-full">${p.category}</span>
+                    </td>
+                    <td class="py-3 px-4 font-semibold text-brand-wine">R$ ${p.price.toFixed(2).replace('.', ',')}</td>
+                    <td class="py-3 px-4 text-right space-x-2">
+                        <button onclick="editProduct('${p.id}')" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteProduct('${p.id}')" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Excluir">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openProductModal(editId = null) {
+            const modal = document.getElementById('productModal');
+            const box = document.getElementById('productModalBox');
+            const title = document.getElementById('productModalTitle');
+
+            if (editId) {
+                const prod = products.find(p => p.id === editId);
+                if (!prod) return;
+                title.textContent = "Editar Produto";
+                document.getElementById('prodId').value = prod.id;
+                document.getElementById('prodName').value = prod.name;
+                document.getElementById('prodPrice').value = prod.price;
+                document.getElementById('prodCategory').value = prod.category;
+                document.getElementById('prodImage').value = prod.image;
+                document.getElementById('prodDesc').value = prod.description;
+            } else {
+                title.textContent = "Adicionar Novo Produto";
+                document.getElementById('prodId').value = "";
+                document.getElementById('prodName').value = "";
+                document.getElementById('prodPrice').value = "";
+                document.getElementById('prodCategory').value = "Roupas";
+                document.getElementById('prodImage').value = "";
+                document.getElementById('prodDesc').value = "";
+            }
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }
+
+        function closeProductModal() {
+            const modal = document.getElementById('productModal');
+            const box = document.getElementById('productModalBox');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            box.classList.remove('scale-100');
+            box.classList.add('scale-95');
+        }
+
+        function saveProduct(e) {
+            e.preventDefault();
+            const id = document.getElementById('prodId').value;
+            const name = document.getElementById('prodName').value.trim();
+            const price = parseFloat(document.getElementById('prodPrice').value);
+            const category = document.getElementById('prodCategory').value;
+            const image = document.getElementById('prodImage').value.trim();
+            const description = document.getElementById('prodDesc').value.trim();
+
+            if (id) {
+                // Editar
+                const idx = products.findIndex(p => p.id === id);
+                if (idx !== -1) {
+                    products[idx] = { id, name, price, category, image, description };
+                    showToast("Produto atualizado com sucesso!");
+                }
+            } else {
+                // Novo
+                const newProd = {
+                    id: Date.now().toString(),
+                    name,
+                    price,
+                    category,
+                    image,
+                    description
+                };
+                products.unshift(newProd);
+                showToast("Novo produto cadastrado!");
+            }
+
+            saveProductsToStorage();
+            renderProducts();
+            renderAdminTable();
+            closeProductModal();
+        }
+
+        function editProduct(id) {
+            openProductModal(id);
+        }
+
+        function deleteProduct(id) {
+            const prod = products.find(p => p.id === id);
+            if (prod && confirm(`Tem certeza que deseja excluir o produto "${prod.name}"?`)) {
+                products = products.filter(p => p.id !== id);
+                saveProductsToStorage();
+                renderProducts();
+                renderAdminTable();
+                showToast("Produto removido com sucesso.");
+            }
+        }
+
+        // SISTEMA DE TOAST DE NOTIFICAÇÃO
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.textContent = msg;
+
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
